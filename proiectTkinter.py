@@ -1,5 +1,4 @@
 import tkinter as tk
-import colorsys
 
 class FractalDrawer:
     def __init__(self, root):
@@ -27,7 +26,7 @@ class FractalDrawer:
         clear_button.grid(row=0, column=3, pady=10)
 
         # Canvas widget for drawing
-        self.canvas = tk.Canvas(self.root, width=1200, height=800, bg="white")
+        self.canvas = tk.Canvas(self.root, width=800, height=600, bg="white")  # Adjusted resolution
         self.canvas.grid(row=1, column=0, columnspan=4, pady=10)
 
     def draw_fractal(self):
@@ -41,22 +40,11 @@ class FractalDrawer:
             self.draw_dragon()
 
     def draw_mandelbrot(self):
-        self.canvas.delete("all")
-        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
-        max_iter = 100
+        self.draw_fractal_generic(self.mandelbrot_color)
 
-        for y in range(height):
-            self.root.update()
-
-            for x in range(width):
-                zx, zy = x * (3.0 / width) - 2, y * (2.0 / height) - 1
-                c = zx + zy * 1j
-                z = c
-                color = self.mandelbrot_color(z, c, max_iter)
-                if color == "#000000":
-                    self.canvas.create_rectangle(x, y, x + 1, y + 1, fill=color, outline=color)
-
-    def mandelbrot_color(self, z, c, max_iter=100):
+    def mandelbrot_color(self, zx, zy, max_iter=50):  # Adjusted max_iter
+        c = zx + zy * 1j
+        z = c
         for i in range(max_iter):
             if abs(z) > 2.0:
                 return "#000000"
@@ -64,50 +52,39 @@ class FractalDrawer:
         return "#FFFFFF"
 
     def draw_julia(self):
-        self.canvas.delete("all")
-        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
-        max_iter = 100
+        self.draw_fractal_generic(self.julia_color)
+
+    def julia_color(self, zx, zy, max_iter=50):  # Adjusted max_iter
         julia_constant = complex(-0.7, 0.27015)
-
-        for y in range(height):
-            self.root.update()
-
-            for x in range(width):
-                zx, zy = x * (3.0 / width) - 2, y * (2.0 / height) - 1
-                z = complex(zx, zy)
-                color = self.julia_color(z, julia_constant, max_iter)
-                if color == "#000000":
-                    self.canvas.create_rectangle(x, y, x + 1, y + 1, fill=color, outline=color)
-
-    def julia_color(self, z, c, max_iter=100):
+        z = complex(zx, zy)
         for i in range(max_iter):
             if abs(z) > 2.0:
                 return "#000000"
-            z = z * z + c
+            z = z * z + julia_constant
         return "#FFFFFF"
 
     def draw_dragon(self):
-        self.canvas.delete("all")
-        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
-        max_iter = 500
+        self.draw_fractal_generic(self.dragon_color)
 
-        for y in range(height):
-            self.root.update()
-
-            for x in range(width):
-                zx, zy = x * (3.0 / width) - 2, y * (2.0 / height) - 1
-                c = complex(-0.5, 0.5)
-                z = complex(zx, zy)
-                color = self.dragon_color(z, c, max_iter)
-                if color == "#000000":
-                    self.canvas.create_rectangle(x, y, x + 1, y + 1, fill=color, outline=color)
-
-    def dragon_color(self, z, c, max_iter=500):
+    def dragon_color(self, zx, zy, max_iter=200):  # Adjusted max_iter
+        c = complex(-0.5, 0.5)
+        z = complex(zx, zy)
         for i in range(max_iter):
             if abs(z) > 2.0:
                 return "#000000"
             z = complex(z.real**2 - z.imag**2 + c.real, 2 * z.real * z.imag + c.imag)
         return "#FFFFFF"
+
+    def draw_fractal_generic(self, color_func):
+        self.canvas.delete("all")
+        width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
+
+        for y in range(height):
+            for x in range(width):
+                zx, zy = x * (3.0 / width) - 2, y * (2.0 / height) - 1
+                color = color_func(zx, zy)
+                if color == "#000000":
+                    self.canvas.create_rectangle(x, y, x + 1, y + 1, fill=color, outline=color)
 
     def clear_canvas(self):
         self.canvas.delete("all")
